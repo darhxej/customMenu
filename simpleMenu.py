@@ -19,7 +19,7 @@ class simpleMenu( ):
 		del self.menuOptions[ '0' ]
 		self.currentAutoIndex = 0
 
-	def reset( self, title, offset=0 ):
+	def reset( self, title ):
 		#sets default values
 		#creates menuOptions used to store the functions related to the menu
 		#creates menuNames that stores user readable name
@@ -46,11 +46,13 @@ class simpleMenu( ):
 
 		#currently selected key
 		self.selection = ''
+	
 
-	def __init__( self, title, offset=0 ):
+	def __init__( self, title, defaultFunction = False ):
 		#sets title calls reset to set values
 		self.title = title
-		self.reset( title, offset )
+		self.reset( title )
+		self.defaultFunction = defaultFunction
 
 	def change_backFunction( self, key, func, name, args=False ):
 		#replaces key value function for the first value
@@ -85,6 +87,13 @@ class simpleMenu( ):
 	def menu_option_remove( self, key ):
 		del self.menuOptions[ key ]
 
+	def defaultFunciton_SetTo( self, func, args = False):
+		if( args ):
+			func_custom = functools.partial( func, args )
+		else:
+			func_custom = func
+		self.defaultFunction = func_custom
+
 	def menu_print( self ):
 		#prints the title and adds '-' as a seperator
 		#with the length as the title
@@ -114,6 +123,9 @@ class simpleMenu( ):
 				#clears terminal
 				clearScreen()
 
+				if(self.defaultFunction):
+					self.defaultFunction()
+				
 				#prints the menu
 				self.menu_print()
 
@@ -126,5 +138,6 @@ class simpleMenu( ):
 					else:
 						print(inp, 'is not on list')
 						pause()
+				
 			else:
 				break
