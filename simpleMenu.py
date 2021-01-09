@@ -6,8 +6,8 @@ def clearScreen( ):
 	os.system('cls' if os.name == 'nt' else 'clear')
 
 #wait for user to press enter
-def pause( ):
-	input( 'Press enter to continue...' )
+def pause( text = 'Press enter to continue...'):
+	input( text )
 
 class simpleMenu( ):
 	#default back function that enables loop exit
@@ -47,6 +47,12 @@ class simpleMenu( ):
 		#currently selected key
 		self.selection = ''
 	
+	def outside_loop_break(self):
+		self.run = False
+		self.breaking = True
+
+	def change_back_to_outside_loop_break(self, name = 'Back'):
+		self.menuOptions['0'] = [ self.outside_loop_break, name ]
 
 	def __init__( self, title, defaultFunction = False ):
 		#sets title calls reset to set values
