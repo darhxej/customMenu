@@ -17,7 +17,7 @@ class simpleMenu( ):
 	#deletes the first default option and sets the offset to 1
 	def delBackAndOffset( self ):
 		del self.menuOptions[ '0' ]
-		self.currentAutoIndex = 0
+		self.currentAutoIndex = 1
 
 	def reset( self, title ):
 		#sets default values
