@@ -38,7 +38,7 @@ class simpleMenu( ):
 		#for breaking outside the loop
 		self.breaking = False
 
-		#for adding space inbetween the option
+		#for adding space in between the option
 		self.spacing = []
 
 		#for currect indexing when a str is added as a key
@@ -93,7 +93,7 @@ class simpleMenu( ):
 	def menu_option_remove( self, key ):
 		del self.menuOptions[ key ]
 
-	def defaultFunciton_SetTo( self, func, args = False):
+	def defaultFunction_SetTo( self, func, args = False):
 		if( args ):
 			func_custom = functools.partial( func, args )
 		else:
