@@ -1,5 +1,51 @@
 import os 
 import functools
+from msvcrt import getch
+#clear terminal
+class IterableArray:
+	def __init__( self, arr ):
+		self.arr = arr
+		self.index = 1
+		self.index_max = len( self.arr ) - 1
+		self.used = False
+
+	def next( self ):
+		self.used = True
+		if self.index == self.index_max:
+			self.index = 0
+			return self.arr[ self.index ]
+		self.index += 1
+		return self.arr[ self.index ]
+	
+	def prev( self ):
+		self.used = True
+		if self.index == 0:
+			self.index = len( self.arr )
+		self.index -= 1
+		return self.arr[ self.index ]
+
+	def restart( self ):
+		self.index = 1
+
+def getInput():
+	userInput = ''
+	while True:
+		ch = getch()
+		if ( ch == b'H' or ch == b'K' ):
+			return 'Prev'
+		elif ( ch == b'P' or ch == b'M' ):
+			return 'Next'
+		elif ( ch == b'\r' ):
+			return userInput
+		elif ( ch == b'\xe0' ):
+			pass
+		elif( ch == b'\b' ):
+			if ( len( userInput ) > 0 ):
+				userInput = userInput[:-1]
+				print( '\b \b', end = '', flush = True )
+		else:
+			userInput += ch.decode()
+			print( ch.decode(), end = '', flush = True )
 
 #clear terminal
 def clearScreen( ):
@@ -100,7 +146,7 @@ class simpleMenu( ):
 			func_custom = func
 		self.defaultFunction = func_custom
 
-	def menu_print( self ):
+	def menu_print( self, currentSelection = '' ):
 		#prints the title and adds '-' as a seperator
 		#with the length as the title
 		print( self.title )
@@ -112,7 +158,11 @@ class simpleMenu( ):
 		#in format '[key] name'
 		#print(self.menuOptions)
 		for key,value in self.menuOptions.items():
-			temp= '[' + str(key) + ']'
+			if( currentSelection == str( key ) ):
+				temp = '->'
+			else:
+				temp = '  '
+			temp += '[' + str(key) + ']'
 			print ( temp, value[1] )
 			if key in self.spacing:
 				print()
@@ -122,6 +172,8 @@ class simpleMenu( ):
 		self.description = ''
 	
 	def menu_start( self ):
+		inputChoice = '1'
+		choiceIteration = IterableArray( list( self.menuOptions.keys() ) )
 		while ( True ):
 			#if the loop should still run
 			if(self.run):
@@ -133,17 +185,24 @@ class simpleMenu( ):
 					self.defaultFunction()
 				
 				#prints the menu
-				self.menu_print()
-
-				#gets user choice
-				inp = input('Choice ->')
-				if(inp != ''):
-					menuOption = self.menuOptions.get(inp, False)
-					if(menuOption):
-						menuOption[0]()
+				self.menu_print( currentSelection = inputChoice )
+				print( 'Choice -> ', end = '', flush = True )
+				inp = getInput()
+				if ( inp == 'Next'):
+					inputChoice = choiceIteration.next()
+				elif ( inp == 'Prev'):
+					inputChoice = choiceIteration.prev()
+				else:
+					print()
+					if( inp != '' ):
+						menuOption = self.menuOptions.get( inp, False )
 					else:
-						print(inp, 'is not on list')
+						menuOption = self.menuOptions.get( inputChoice, False )
+					if( menuOption ):
+						menuOption[ 0 ]()
+					else:
+						print( inp, 'is not on list' )
 						pause()
-				
+
 			else:
 				break
