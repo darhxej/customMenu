@@ -97,14 +97,17 @@ class simpleMenu( ):
 
 		self.menuOptionsExtra_onSelection  = {}
 		self.menuOptionsExtra_always = {}
-
+		self.menuPrintableList = []
 	def add_dict_menuOptionsExtra( self, key, arr, ignoreList = ['Back']):
+		self.menuOptionsExtra[key] = arr
+	''''
 		for value in arr:
 			if (value not in ignoreList):
 				if ( self.menuOptionsExtra.get( key, False ) ):
 					self.menuOptionsExtra[ key ].append(value)
 				else:
 					self.menuOptionsExtra[ key ] = [value]
+	'''
 
 	def add_menuOptionsExtra( self, key, value ):
 		if ( self.menuOptionsExtra.get( key, False ) ):
@@ -112,11 +115,8 @@ class simpleMenu( ):
 		else:
 			self.menuOptionsExtra[ key ] = [value]
 
-	def get_OptionsPrint(self):
-		arr = []
-		for value in self.menuOptions.values():
-			arr.append(value[1])
-		return arr
+	def get_MenuOptions(self):
+		return self.menuOptions
 
 	def outside_loop_break(self):
 		self.run = False
@@ -125,11 +125,12 @@ class simpleMenu( ):
 	def change_back_to_outside_loop_break(self, name = 'Back'):
 		self.menuOptions['0'] = [ self.outside_loop_break, name ]
 
-	def __init__( self, title, defaultFunction = False ):
+	def __init__( self, title, defaultFunction = False, extraIndentation=1 ):
 		#sets title calls reset to set values
 		self.title = title
 		self.reset( title )
 		self.defaultFunction = defaultFunction
+		self.extraIndentation = extraIndentation
 
 	def change_backFunction( self, key, func, name, args=False ):
 		#replaces key value function for the first value
@@ -171,6 +172,16 @@ class simpleMenu( ):
 			func_custom = func
 		self.defaultFunction = func_custom
 
+	def get_menuPrintableList(self, currentSelection = ''):
+		self.menuPrintableList=[]
+		for key,value in self.menuOptions.items():
+			if( currentSelection == str( key ) ):
+				temp = '->'
+			else:
+				temp = '  '
+			temp += '[' + str(key) + ']'
+			self.menuPrintableList.append ( temp + '' + value[1] )
+	
 	def menu_print( self, currentSelection = '' ):
 		#prints the title and adds '-' as a seperator
 		#with the length as the title
@@ -183,7 +194,7 @@ class simpleMenu( ):
 		#in format '[key] name'
 		#print(self.menuOptions)
 		for key,value in self.menuOptions.items():
-			addBranch = False
+			'''
 			if( currentSelection == str( key ) ):
 				temp = '->'
 			else:
@@ -191,11 +202,14 @@ class simpleMenu( ):
 			temp += '[' + str(key) + ']'
 			print ( temp, value[1] )
 			if 	( self.menuOptionsExtra.get( key, False ) and ( self.menuOptionsExtra_onSelection.get( currentSelection, False ) or self.menuOptionsExtra_always.get( key, False ))):
-				for value in self.menuOptionsExtra[key]:
-					print(' '*( 6 + len( str(key) ) ), value)
+				for keyExtra,valueExtra in self.menuOptionsExtra[key].items():
+					print(' '*( 6*self.extraIndentation + len( str(keyExtra) )) +'[' + str(keyExtra) + ']', valueExtra[1])
 			if key in self.spacing:
-				print()
+				print()'''
 		
+		self.get_menuPrintableList(currentSelection=currentSelection)
+		for menuItem in self.menuPrintableList:
+			print(menuItem)
 		print()
 		print( self.description )
 		self.description = ''

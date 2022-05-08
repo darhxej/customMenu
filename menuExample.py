@@ -44,7 +44,7 @@ def option_newMenu_selection( getOptions = False ):
 	if(not getOptions):
 		sMenuBranched.menu_start()
 	else:
-		return sMenuBranched.get_OptionsPrint()
+		return sMenuBranched.get_MenuOptions()
 
 def option_newMenu_always( getOptions = False ):
 	sMenuBranched = simpleMenu('Branched menu always')
@@ -61,7 +61,7 @@ def option_newMenu_always( getOptions = False ):
 	if(not getOptions):
 		sMenuBranched.menu_start()
 	else:
-		return sMenuBranched.get_OptionsPrint()
+		return sMenuBranched.get_MenuOptions()
 
 
 def option_branched_backOffsetMenu():
