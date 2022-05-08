@@ -92,7 +92,32 @@ class simpleMenu( ):
 
 		#currently selected key
 		self.selection = ''
-	
+
+		self.menuOptionsExtra = {}
+
+		self.menuOptionsExtra_onSelection  = {}
+		self.menuOptionsExtra_always = {}
+
+	def add_dict_menuOptionsExtra( self, key, arr, ignoreList = ['Back']):
+		for value in arr:
+			if (value not in ignoreList):
+				if ( self.menuOptionsExtra.get( key, False ) ):
+					self.menuOptionsExtra[ key ].append(value)
+				else:
+					self.menuOptionsExtra[ key ] = [value]
+
+	def add_menuOptionsExtra( self, key, value ):
+		if ( self.menuOptionsExtra.get( key, False ) ):
+			self.menuOptionsExtra[ key ].append(value)
+		else:
+			self.menuOptionsExtra[ key ] = [value]
+
+	def get_OptionsPrint(self):
+		arr = []
+		for value in self.menuOptions.values():
+			arr.append(value[1])
+		return arr
+
 	def outside_loop_break(self):
 		self.run = False
 		self.breaking = True
@@ -158,12 +183,16 @@ class simpleMenu( ):
 		#in format '[key] name'
 		#print(self.menuOptions)
 		for key,value in self.menuOptions.items():
+			addBranch = False
 			if( currentSelection == str( key ) ):
 				temp = '->'
 			else:
 				temp = '  '
 			temp += '[' + str(key) + ']'
 			print ( temp, value[1] )
+			if 	( self.menuOptionsExtra.get( key, False ) and ( self.menuOptionsExtra_onSelection.get( currentSelection, False ) or self.menuOptionsExtra_always.get( key, False ))):
+				for value in self.menuOptionsExtra[key]:
+					print(' '*( 6 + len( str(key) ) ), value)
 			if key in self.spacing:
 				print()
 		
