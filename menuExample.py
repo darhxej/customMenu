@@ -29,6 +29,26 @@ def option_indexCheck():
 	sMenu.description = 'Index should be 4'
 
 
+def option_newMenu_selection_depth1( getOptions = False ):
+	sMenuBranched = simpleMenu('Branched menu selection')
+
+	def option_description_branched_1():
+		sMenuBranched.description = 'You have selected the branched the First option 1'
+
+	def option_description_branched_2():
+		sMenuBranched.description = 'You have selected the branched the Second option 1'
+	
+	sMenuBranched.menu_option_add(option_description_branched_1, 	'First option 1')
+	sMenuBranched.menu_option_add(option_description_branched_2, 	'Second option 1')
+	sMenuBranched.menu_option_add(option_branched_backOffsetMenu,	'Offset Menu 1')
+	sMenuBranched.menu_build()
+
+	return sMenuBranched
+	#if(not getOptions):
+	#	sMenuBranched.menu_start()
+	#else:
+	#	return sMenuBranched.get_MenuOptions()
+
 def option_newMenu_selection( getOptions = False ):
 	sMenuBranched = simpleMenu('Branched menu selection')
 
@@ -41,10 +61,14 @@ def option_newMenu_selection( getOptions = False ):
 	sMenuBranched.menu_option_add(option_description_branched_1, 	'First option')
 	sMenuBranched.menu_option_add(option_description_branched_2, 	'Second option')
 	sMenuBranched.menu_option_add(option_branched_backOffsetMenu,	'Offset Menu')
-	if(not getOptions):
-		sMenuBranched.menu_start()
-	else:
-		return sMenuBranched.get_MenuOptions()
+	sMenuBranched.add_subMenu( '2', option_newMenu_selection_depth1(), onSelection=True )
+	sMenuBranched.menu_build()
+
+	return sMenuBranched
+	#if(not getOptions):
+	#	sMenuBranched.menu_start()
+	#else:
+	#	return sMenuBranched.get_MenuOptions()
 
 def option_newMenu_always( getOptions = False ):
 	sMenuBranched = simpleMenu('Branched menu always')
@@ -58,10 +82,11 @@ def option_newMenu_always( getOptions = False ):
 	sMenuBranched.menu_option_add(option_description_branched_1, 	'First option')
 	sMenuBranched.menu_option_add(option_description_branched_2, 	'Second option')
 	sMenuBranched.menu_option_add(option_branched_backOffsetMenu,	'Offset Menu')
-	if(not getOptions):
-		sMenuBranched.menu_start()
-	else:
-		return sMenuBranched.get_MenuOptions()
+	return sMenuBranched
+	#if(not getOptions):
+	#	sMenuBranched.menu_start()
+	#else:
+	#	return sMenuBranched.get_MenuOptions()
 
 
 def option_branched_backOffsetMenu():
@@ -86,9 +111,9 @@ sMenu.menu_option_add(option_customKey, 	'Option with a string selection',	custo
 sMenu.menu_option_add(option_description, 	'Descrition Option', 				customKey='d' ) #d
 sMenu.menu_option_add(option_indexCheck, 	'autoIndexOption check' ) #4
 sMenu.menu_option_add(option_newMenu_selection, 		'Branched menu on Select' ) #5
-sMenu.add_dict_menuOptionsExtra( '5', option_newMenu_selection( getOptions=True ) )
-sMenu.menuOptionsExtra_onSelection['5'] = True
+#subMenu = option_newMenu_selection()
+sMenu.add_subMenu( '5', option_newMenu_selection(), onSelection=True )
 sMenu.menu_option_add(option_newMenu_always, 		'Branched menu allways' ) #6
-sMenu.add_dict_menuOptionsExtra( '6', option_newMenu_always( getOptions=True ) )
-sMenu.menuOptionsExtra_always['6'] = True
+sMenu.add_subMenu( '6', option_newMenu_always(), always=True )
+sMenu.menu_build()
 sMenu.menu_start()
