@@ -1,12 +1,13 @@
 import os 
 import functools
 from msvcrt import getch
-import this
+
+from numpy import spacing
 #clear terminal
 class IterableArray:
 	def __init__( self, arr ):
 		self.arr = arr
-		self.index = 1
+		self.index = 0
 		self.index_max = len( self.arr ) - 1
 		self.used = False
 
@@ -97,53 +98,38 @@ class simpleMenu( ):
 		#for currect indexing when a str is added as a key
 		self.currentAutoIndex = 1
 
-		#currently selected key
-		self.selection = ''
-
 		self.menuOptionsExtra = {}
 
 		self.menuOptionsExtra_onSelection  = {}
 		self.menuOptionsExtra_always = {}
 		self.menuPrintableList = []
-		self.parent=None
+		
 	def __init__( self, title, defaultFunction = False, depth=0 ):
 		#sets title calls reset to set values
 		self.title = title
 		self.reset( title )
 		self.defaultFunction = defaultFunction
 		self.depth = depth
-	def add_subMenu(self, key, subMenu, onSelection=False, always=False):
-		subMenu.depth= self.depth+1
-		subMenu.add_subMenu_depths()
-		subMenu.menu_build()
-		subMenu.set_menuPrintableList()
-		subMenu.parent = self
+		self.parent=None
+	
+	def add_subMenu(self, key, name, subMenu, onSelection=False, always=False):
 		self.menuOptionsExtra[key] = subMenu
+		self.add_depth(subMenu)
+		subMenu.parent = self
 		if(onSelection):
 			self.menuOptionsExtra_onSelection[key] = True
 		if(always):
 			self.menuOptionsExtra_always[key]=True
+		self.menu_option_add(None, name)
+	
+	def add_depth(self, menu):
+		menu.depth = self.depth + 1
+		menu.add_subMenu_depths()
+		menu.menu_build()
+	
 	def add_subMenu_depths(self):
 		for key,subMenu in self.menuOptionsExtra.items():
-			subMenu.depth = self.depth + 1
-			subMenu.menu_build()
-			subMenu.set_menuPrintableList()
-	def add_dict_menuOptionsExtra( self, key, arr, ignoreList = ['Back']):
-		self.menuOptionsExtra[key] = arr
-	''''
-		for value in arr:
-			if (value not in ignoreList):
-				if ( self.menuOptionsExtra.get( key, False ) ):
-					self.menuOptionsExtra[ key ].append(value)
-				else:
-					self.menuOptionsExtra[ key ] = [value]
-	'''
-
-	def add_menuOptionsExtra( self, key, value ):
-		if ( self.menuOptionsExtra.get( key, False ) ):
-			self.menuOptionsExtra[ key ].append(value)
-		else:
-			self.menuOptionsExtra[ key ] = [value]
+			self.add_depth(subMenu)
 
 	def get_MenuOptions(self):
 		return self.menuOptions
@@ -198,6 +184,8 @@ class simpleMenu( ):
 	def set_menuPrintableList(self, choiceOverwrite=None):
 		self.menuPrintableList=[]
 		for key,value in self.menuOptions.items():
+			if(str(key) in self.spacing):
+				self.menuPrintableList.append ( '' )
 			temp=' '*(6*self.depth)
 			if(self.choiceIteration.get() == str( key ) and choiceOverwrite==None):
 				temp += '->'
@@ -211,7 +199,11 @@ class simpleMenu( ):
 				subMenu=self.menuOptionsExtra[self.choiceIteration.get()]
 				for item in subMenu.menuPrintableList:
 					self.menuPrintableList.append ( item )
-	
+		if(self.description!=''):
+			self.menuPrintableList.append ( '' )
+			self.menuPrintableList.append ( ' '*(6*self.depth)+self.description )
+			self.description = ''
+
 	def menu_print( self):
 		#prints the title and adds '-' as a seperator
 		#with the length as the title
@@ -220,36 +212,17 @@ class simpleMenu( ):
 		for _ in self.title:
 			seperator +='-'
 		print( seperator )
-		#prints all the use readable names
-		#in format '[key] name'
-		#print(self.menuOptions)
-		'''for key,value in self.menuOptions.items():
-			
-			if( currentSelection == str( key ) ):
-				temp = '->'
-			else:
-				temp = '  '
-			temp += '[' + str(key) + ']'
-			print ( temp, value[1] )
-			if 	( self.menuOptionsExtra.get( key, False ) and ( self.menuOptionsExtra_onSelection.get( currentSelection, False ) or self.menuOptionsExtra_always.get( key, False ))):
-				for keyExtra,valueExtra in self.menuOptionsExtra[key].items():
-					print(' '*( 6*self.extraIndentation + len( str(keyExtra) )) +'[' + str(keyExtra) + ']', valueExtra[1])
-			if key in self.spacing:
-				print()'''
 		
-		#self.set_menuPrintableList()
 		for menuItem in self.menuPrintableList:
 			print(menuItem)
-		print()
-		print( self.description )
-		self.description = ''
 	
 	def set_Iterator(self):
 		self.choiceIteration = IterableArray( list( self.menuOptions.keys() ) )
 
-	def setInput(self,inp,childInp=False):
+	def setInput(self, inp, childInp=False):
 		if (self.menuOptionsExtra.get( self.choiceIteration.get(), False ) and not childInp):
-			self.menuOptionsExtra[self.choiceIteration.get()].setInput(inp)
+			subMenu=self.menuOptionsExtra[self.choiceIteration.get()]
+			subMenu.setInput(inp)
 			self.set_menuPrintableList()
 			return
 		if ( inp == 'Next'):
@@ -257,24 +230,22 @@ class simpleMenu( ):
 				self.parent.setInput(inp, childInp=True)
 			else:
 				self.choiceIteration.next()
-				self.set_menuPrintableList()
 		elif ( inp == 'Prev'):
 			if (self.choiceIteration.is_min()):
 				self.parent.setInput(inp, childInp=True)
 			else:
 				self.choiceIteration.prev()
-				self.set_menuPrintableList()
 		else:
 			if( inp != '' ):
 				menuOption = self.menuOptions.get( inp, False )
 			else:
 				menuOption = self.menuOptions.get( self.choiceIteration.get(), False )
-				#self.select()
 			if( menuOption ):
 				menuOption[ 0 ]()
 			else:
 				print( inp, 'is not on list' )
 				pause()
+		self.set_menuPrintableList()
 		
 	def menu_build(self):
 		self.set_Iterator()
@@ -297,22 +268,6 @@ class simpleMenu( ):
 				inp = getInput()
 				#send next, prev, enter to child
 				self.setInput(inp)
-				'''
-				if ( inp == 'Next'):
-					self.next()
-				elif ( inp == 'Prev'):
-					self.prev()
-				else:
-					if( inp != '' ):
-						menuOption = self.menuOptions.get( inp, False )
-					else:
-						menuOption = self.menuOptions.get( self.choiceIteration.get(), False )
-						#self.select()
-					if( menuOption ):
-						menuOption[ 0 ]()
-					else:
-						print( inp, 'is not on list' )
-						pause()'''
 
 			else:
 				break
