@@ -2,7 +2,6 @@ import os
 import functools
 from msvcrt import getch
 
-from numpy import spacing
 #clear terminal
 class IterableArray:
 	def __init__( self, arr ):
@@ -34,6 +33,10 @@ class IterableArray:
 		return self.index == self.index_max
 	def is_min(self):
 		return self.index == 0
+	def first(self):
+		self.index = 0
+	def last(self):
+		self.index = self.index_max
 
 def getInput():
 	userInput = ''
@@ -112,7 +115,10 @@ class simpleMenu( ):
 		self.depth = depth
 		self.parent=None
 	
-	def add_subMenu(self, key, name, subMenu, onSelection=False, always=False):
+	def add_subMenu(self, name, subMenu, onSelection=False, always=False, key=None):
+		if(type(key) is type(None)):
+			key=str(self.currentAutoIndex)
+			self.currentAutoIndex += 1
 		self.menuOptionsExtra[key] = subMenu
 		self.add_depth(subMenu)
 		subMenu.parent = self
@@ -120,7 +126,7 @@ class simpleMenu( ):
 			self.menuOptionsExtra_onSelection[key] = True
 		if(always):
 			self.menuOptionsExtra_always[key]=True
-		self.menu_option_add(None, name)
+		self.menu_option_add(None, name, customKey=str(key))
 	
 	def add_depth(self, menu):
 		menu.depth = self.depth + 1
@@ -183,20 +189,22 @@ class simpleMenu( ):
 
 	def set_menuPrintableList(self, choiceOverwrite=None):
 		self.menuPrintableList=[]
+		currentChoice = self.choiceIteration.get()
 		for key,value in self.menuOptions.items():
-			if(str(key) in self.spacing):
+			keyStr=str(key)
+			if(keyStr in self.spacing):
 				self.menuPrintableList.append ( '' )
 			temp=' '*(6*self.depth)
-			if(self.choiceIteration.get() == str( key ) and choiceOverwrite==None):
+			if(currentChoice == str( key ) and choiceOverwrite==None):
 				temp += '->'
 			elif(choiceOverwrite== str( key )):
 				temp += '->'
 			else:
 				temp += '  '
-			temp += '[' + str(key) + ']'
+			temp += '[' + keyStr + ']'
 			self.menuPrintableList.append ( temp + '' + value[1] )
-			if (self.menuOptionsExtra.get( self.choiceIteration.get(), False ) and self.choiceIteration.get() == str( key )):
-				subMenu=self.menuOptionsExtra[self.choiceIteration.get()]
+			if(self.menuOptionsExtra_always.get(keyStr,False) or (self.menuOptionsExtra.get( keyStr, False ) and currentChoice == keyStr)):
+				subMenu=self.menuOptionsExtra[keyStr]
 				for item in subMenu.menuPrintableList:
 					self.menuPrintableList.append ( item )
 		if(self.description!=''):
@@ -227,7 +235,9 @@ class simpleMenu( ):
 			return
 		if ( inp == 'Next'):
 			if (self.choiceIteration.is_max()):
-				self.parent.setInput(inp, childInp=True)
+				if(type(self.parent) is not type(None)):
+					self.parent.setInput(inp, childInp=True)
+				self.choiceIteration.first()
 			else:
 				self.choiceIteration.next()
 		elif ( inp == 'Prev'):

@@ -54,7 +54,7 @@ def option_newMenu_selection( getOptions = False ):
 		sMenuBranched.description = 'You have selected the depth 1, branched third option'
 	
 	sMenuBranched.menu_option_add(option_description_branched_1, 	'First option')
-	sMenuBranched.add_subMenu( '2', 'Second option', option_newMenu_selection_depth1(), onSelection=True )
+	sMenuBranched.add_subMenu( 'Second option', option_newMenu_selection_depth1(), onSelection=True )
 	sMenuBranched.menu_option_add(option_description_branched_3, 	'First option')
 	sMenuBranched.menu_build()
 
@@ -95,7 +95,7 @@ sMenu.menu_option_add(option_args, 			'Option with passed arguments', 	args=['fi
 sMenu.menu_option_add(option_customKey, 	'Option with a string selection',	customKey='e' ) #e
 sMenu.menu_option_add(option_description, 	'Descrition Option', 				customKey='d' ) #d
 sMenu.menu_option_add(option_indexCheck, 	'autoIndexOption check' ) #4
-sMenu.add_subMenu( '5','Branched menu on Select', option_newMenu_selection(), onSelection=True )
-sMenu.add_subMenu( '6','Branched menu allways', option_newMenu_always(), always=True )
+sMenu.add_subMenu( 'Branched menu on Select', option_newMenu_selection(), onSelection=True )
+sMenu.add_subMenu( 'Branched menu allways', option_newMenu_always(), always=True )
 sMenu.menu_build()
 sMenu.menu_start()
